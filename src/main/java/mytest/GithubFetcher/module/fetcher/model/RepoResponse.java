@@ -1,10 +1,11 @@
 package mytest.GithubFetcher.module.fetcher.model;
 
-public class RepoListResponse {
+public class RepoResponse {
 	private String name;
 	private String branches_url;
 	private Boolean fork;
 	private Owner owner;
+
 	public String getName() {
 		return name;
 	}

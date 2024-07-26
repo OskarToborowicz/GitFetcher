@@ -9,11 +9,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import mytest.GithubFetcher.advice.exception.UserNotFoundException;
 import mytest.GithubFetcher.module.fetcher.model.BranchResponse;
-import mytest.GithubFetcher.module.fetcher.model.RepoListResponse;
+import mytest.GithubFetcher.module.fetcher.model.RepoResponse;
 
 @Service
 class WebClientService {
-	
+
 	private WebClient webClient;
 
 	WebClientService() {
@@ -21,14 +21,19 @@ class WebClientService {
 	}
 
 	List<BranchResponse> fetchBranchesFromGithub(String uri) {
-		return webClient.get().uri(UriComponentsBuilder.fromUriString(uri).build().toUri()).retrieve()
+		return webClient.get()
+				.uri(UriComponentsBuilder.fromUriString(uri).build().toUri())
+				.retrieve()
 				.toEntityList(BranchResponse.class).flux().blockLast().getBody();
 	}
 
-	List<RepoListResponse> fetchRepositoriesFromGithub(String uri) throws UserNotFoundException {
-		return webClient.get().uri(UriComponentsBuilder.fromUriString(uri).build().toUri()).retrieve()
-				.onStatus(httpStatus -> httpStatus == HttpStatus.NOT_FOUND, clientResponse -> {
-					return clientResponse.createException().map(it -> new UserNotFoundException(it.getStatusText()));
-				}).toEntityList(RepoListResponse.class).flux().blockLast().getBody();
+	List<RepoResponse> fetchRepositoriesFromGithub(String uri) throws UserNotFoundException {
+		return webClient.get()
+				.uri(UriComponentsBuilder.fromUriString(uri).build().toUri())
+				.retrieve()
+				.onStatus(httpStatus -> httpStatus == HttpStatus.NOT_FOUND,
+						clientResponse -> clientResponse.createException()
+								.map(it -> new UserNotFoundException(it.getStatusText())))
+				.toEntityList(RepoResponse.class).flux().blockLast().getBody();
 	}
 }

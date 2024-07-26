@@ -16,9 +16,10 @@ import mytest.GithubFetcher.module.fetcher.model.RepositoryInfo;
 public class FetcherController {
 	@Autowired
 	private FetcherService fetcherService;
-	
+
 	@GetMapping("get-repositories-by-username/{username}")
-	public List<RepositoryInfo> getRepostioriesByUsername(@RequestHeader(HttpHeaders.ACCEPT) String acceptHeader, @PathVariable String username){
+	public List<RepositoryInfo> getRepostioriesByUsername(@RequestHeader(HttpHeaders.ACCEPT) String acceptHeader,
+			@PathVariable String username) {
 		return fetcherService.getRepositoryInfoByUsername(username);
 	};
 }

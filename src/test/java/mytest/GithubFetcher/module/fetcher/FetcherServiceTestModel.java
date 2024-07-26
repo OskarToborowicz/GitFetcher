@@ -5,14 +5,14 @@ import java.util.List;
 import mytest.GithubFetcher.module.fetcher.model.BranchResponse;
 import mytest.GithubFetcher.module.fetcher.model.Commit;
 import mytest.GithubFetcher.module.fetcher.model.Owner;
-import mytest.GithubFetcher.module.fetcher.model.RepoListResponse;
+import mytest.GithubFetcher.module.fetcher.model.RepoResponse;
 
 class FetcherServiceTestModel {
 
-	static final List<RepoListResponse> getRepoList() {
+	static final List<RepoResponse> getRepoList() {
 		Owner owner1 = new Owner();
 		owner1.setLogin("ownerlogin");
-		RepoListResponse repo1 = new RepoListResponse();
+		RepoResponse repo1 = new RepoResponse();
 		repo1.setBranches_url("branchesURL");
 		repo1.setFork(false);
 		repo1.setName("name");
@@ -28,5 +28,4 @@ class FetcherServiceTestModel {
 		branch1.setName("branch1name");
 		return List.of(branch1);
 	}
-
 }

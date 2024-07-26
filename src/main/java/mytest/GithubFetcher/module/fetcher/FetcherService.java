@@ -13,43 +13,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mytest.GithubFetcher.module.fetcher.model.Branch;
-import mytest.GithubFetcher.module.fetcher.model.RepoListResponse;
+import mytest.GithubFetcher.module.fetcher.model.RepoResponse;
 import mytest.GithubFetcher.module.fetcher.model.RepositoryInfo;
 
 @Service
 public class FetcherService {
-	
+
 	@Autowired
 	private WebClientService webClientService;
 
 	public List<RepositoryInfo> getRepositoryInfoByUsername(String username) {
-		String url = GITHUB_API_URL.replace(USERNAME, username);
-		List<RepoListResponse> entityList = fetchRepositoriesFromGithub(url);
-		List<RepoListResponse> nonforkRepositories = filterNonforkRepositories(entityList);
+		String uri = GITHUB_API_URL.replace(USERNAME, username);
+		List<RepoResponse> fetchedRepositoriesForUser = fetchRepositoriesFromGithub(uri);
+		List<RepoResponse> nonforkRepositories = filterNonforkRepositories(fetchedRepositoriesForUser);
 		return fetchBranchesAndCreateRepositoryInfo(nonforkRepositories);
 	}
 
-	private List<RepositoryInfo> fetchBranchesAndCreateRepositoryInfo(List<RepoListResponse> nonforkRepositories) {
-		List<RepositoryInfo> repoInfoList = new ArrayList<RepositoryInfo>();
-		nonforkRepositories.forEach(response -> {
-			repoInfoList.add(new RepositoryInfo(response.getName(), response.getOwner().getLogin(),
-					fetchAndMapBranches(response)));
-		});
-		return repoInfoList;
+	private List<RepositoryInfo> fetchBranchesAndCreateRepositoryInfo(List<RepoResponse> nonforkRepositories) {
+		return nonforkRepositories.stream().map(repository -> new RepositoryInfo(repository.getName(),
+				repository.getOwner().getLogin(), fetchAndMapBranches(repository))).collect(Collectors.toList());
 	}
 
-	private List<Branch> fetchAndMapBranches(RepoListResponse response) {
-		return webClientService.fetchBranchesFromGithub(response.getBranches_url().replace(BRANCH, Strings.EMPTY))
-				.stream()
+	private List<Branch> fetchAndMapBranches(RepoResponse response) {
+		return webClientService.fetchBranchesFromGithub(removeBranchStringFromUrlAndReturn(response)).stream()
 				.map(branchResponse -> new Branch(branchResponse.getName(), branchResponse.getCommit().getSha()))
 				.collect(Collectors.toList());
 	}
 
-	private List<RepoListResponse> filterNonforkRepositories(List<RepoListResponse> entityList) {
-		return entityList.stream().filter(response -> !response.isFork()).collect(Collectors.toList());
+	private String removeBranchStringFromUrlAndReturn(RepoResponse response) {
+		return response.getBranches_url().replace(BRANCH, Strings.EMPTY);
 	}
 
-	private List<RepoListResponse> fetchRepositoriesFromGithub(String uri) {
+	private List<RepoResponse> filterNonforkRepositories(List<RepoResponse> fetchedRepositoriesForUser) {
+		return fetchedRepositoriesForUser.stream().filter(repository -> !repository.isFork())
+				.collect(Collectors.toList());
+	}
+
+	private List<RepoResponse> fetchRepositoriesFromGithub(String uri) {
 		return webClientService.fetchRepositoriesFromGithub(uri);
 	}
 }
